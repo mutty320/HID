@@ -75,11 +75,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             const value = data.getUint8(7);
 
-            Bit8(data.getUint8(7))
-            Bit7(data.getUint8(6))
-            Bit6(data.getUint8(5))
-            Bit4(data.getUint8(3))
-            Bit2(data.getUint8(1))
+            // Bit8(data.getUint8(7))
+            // Bit7(data.getUint8(6))
+            // Bit6(data.getUint8(5))
+            // Bit4(data.getUint8(3))
+            // Bit2(data.getUint8(1))
 
            // console.log(new Uint8Array(event.data.buffer));
 
