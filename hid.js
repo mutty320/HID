@@ -1,77 +1,65 @@
-document.addEventListener('DOMContentLoaded', async () => {
-    console.log("started");
-
-    const devices = await navigator.hid.getDevices();
-
-    console.log(devices)
-
-    devices.forEach(device => {
-
-        console.log(`HID: ${device.vendorId} ${device.productName} ${device.productId}`);
-    });
-
-
-    let requestButton = document.getElementById("hid-device");
-    requestButton.addEventListener("click", async () => {
-
-        let device = await navigator.hid.requestDevice({filters: [{vendorId: 1678, productId: 28}]});
-        if (!device) {
-            console.log("No device was selected.");
-        } else {
-            // console.log(`HID: ${device[0].vendorId}`);
-            // console.log("HID:", device[0].productName);
-        }
 
 
 //=========================================================================================
+//                      old stuff
+//=========================================================================================
 
-        //navigator.hid
-        // device[0].addEventListener("connect", event => {
-        //     // Automatically open event.device or warn user a device is available.
-        //     console.log(`the: ${device[0].productName}  was conected`);
-        // });
+// document.addEventListener('DOMContentLoaded', async () => {
+//     console.log("started");
+//
+//     const devices = await navigator.hid.getDevices();
+//
+//     console.log(devices)
+//
+//     devices.forEach(device => {
+//
+//         console.log(`HID: ${device.vendorId} ${device.productName} ${device.productId}`);
+//     });
+//
+//
+//     let requestButton = document.getElementById("hid-device");
+//     requestButton.addEventListener("click", async () => {
+//
+//         let device = await navigator.hid.requestDevice({filters: [{/*vendorId: 1678, productId: 28*/}]});
+//         if (!device) {
+//             console.log("No device was selected.");
+//         } else {
+//             // console.log(`HID: ${device[0].vendorId}`);
+//             // console.log("HID:", device[0].productName);
+//         }
+//
 
-        // navigator.hid.addEventListener("disconnect", event => {
-        //     // Remove |event.device| from the UI.
-        // });
-//==========================================================================================
+//=========================================================================================
+//                  function findMyDeviceInList(devices)
+//=========================================================================================
 
-        // let devic = HIDDevice;
-        // devic.vendorId=1678;
-        // devic.productId=28;
-        // devic.productName ="AXIS 295 VIDEO SURVEILLANCE JOYSTICK";
-        // devic.collections.pars
-        // let hid = await navigator.hid.getDevices(devic);
-        // console.log(`fff ${devic}`)
-            device[0].addEventListener('connect', () => {
-            console.log(`HID connected: ${devic.productName}`);
-        });
-        // function handleConnectedDevice(e) {
-        //     console.log("Device connected: " + e.device.productName);
-        // }
-        // navigator.hid.addEventListener("connect", handleConnectedDevice);
-
-        await device[0].open();
-
-
-        for (let collection of device[0].collections) {
-            // A HID collection includes usage, usage page, reports, and subcollections.
-            console.log(`Usage: ${collection.usage}`);
-            console.log(`Usage page: ${collection.usagePage}`);
-
-            for (let inputReport of collection.inputReports) {
-
-                console.log(`Input report: ${inputReport.reportId}`);
-                // Loop through inputReport.items
-            }
+    function findMyDeviceInList(devices){
+        console.log("in findMyDeviceInList");
+        for(let i = 0; devices != null && i < devices.length; i++) {
+            // console.log("in loop " + devices[i].vendorId);
+            if(devices[i].vendorId === 1678)
+                return devices[i];
         }
+        return null;//??
+    }
+//=========================================================================================
+//                  function addListeners()
+//=========================================================================================
+    function addListeners() {
+
+        navigator.hid.addEventListener('disconnect', ({device}) => {
+            console.log(`HID disconnected: ${device.productName}`);
+        });
+
+        navigator.hid.addEventListener('connect', ({device}) => {
+            console.log(`HID connected: ${device.productName}`);
+        });
 
 
-        device[0].addEventListener("inputreport", event => {
+        myDevice.addEventListener("inputreport", event => {
             const {data, device, reportId} = event;
 
             if (device.productId !== 28 && reportId !== 0) return;
-
 
             const value = data.getUint8(7);
 
@@ -81,7 +69,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             Bit4(data.getUint8(3))
             Bit2(data.getUint8(1))
 
-           // console.log(new Uint8Array(event.data.buffer));
+            // console.log(new Uint8Array(event.data.buffer));
 
             // if (value === 0) return;
 
@@ -90,9 +78,75 @@ document.addEventListener('DOMContentLoaded', async () => {
             //  const someButtons = { 1: "22", 2: "23", 4: "25"};
             //  console.log(`User pressed button ${value}.`);
         });
-        navigator.hid.addEventListener("disconnect", ({device}) => {
-            console.log(`was disconnected`);
+
+    }
+
+//=========================================================================================
+//                          main()
+// =========================================================================================
+
+    document.addEventListener('DOMContentLoaded', async () => {
+
+        addListeners();
+
+        var devices = await navigator.hid.getDevices();
+        devices.forEach(device => {
+            console.log(`HID: ${device.vendorId} ${device.productName} ${device.productId} ${device.opened}`);
         });
+        var myDevice = findMyDeviceInList(devices);
+
+        if(!myDevice) {
+            let requestButton = document.getElementById("hid-device");
+            requestButton.innerHTML = "click here to add a new device";
+            requestButton.addEventListener("click", async () => {
+
+            devices = await navigator.hid.requestDevice({filters: []});
+            myDevice = findMyDeviceInList(devices);
+            });
+        }
+
+            await myDevice.open().then(()=>{console.log("opened")})
+            console.log("my device:" + myDevice.vendorId + myDevice.opened);
+            myDeviceDetails(myDevice)
+
+        });
+
+
+
+//==========================================================================================
+//                          function myDeviceDetails(myDevice)
+//==========================================================================================
+
+
+function myDeviceDetails(myDevice) {
+    for (let collection of myDevice.collections) {
+        // A HID collection includes usage, usage page, reports, and subcollections.
+        console.log(`Usage: ${collection.usage}`);
+        console.log(`Usage page: ${collection.usagePage}`);
+
+        for (let inputReport of collection.inputReports) {
+            console.log(`Input report: ${inputReport.reportId}`);
+            // Loop through inputReport.items
+        }
+
+        for (let outputReport of collection.outputReports) {
+            console.log(`Output report: ${outputReport.reportId}`);
+            // Loop through outputReport.items
+        }
+
+        for (let featureReport of collection.featureReports) {
+            console.log(`Feature report: ${featureReport.reportId}`);
+            // Loop through featureReport.items
+        }
+
+        // Loop through subcollections with collection.children
+    }
+}
+
+
+//==========================================================================================
+//              mapping functions
+//==========================================================================================
 
         const Bit8 = (value) => {
             if (value === 8)
@@ -141,118 +195,37 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (value === 0)
                 console.log(`joystick pushed left`)
             if (value === 3)
-                console.log(`joystick pushed right`)
+                console.log(`joystick pushed right`);
 
-        }
-        //======================================================================================
-        // device.oninputreport = ({device, reportId, data}) => {
-        //     console.log(`Input report ${reportId} from ${device.productName}:`,
-        //         new Uint8Array(data.buffer));
-        // };
-        // }
-
-
-//}
-
-
-        // let devices = await navigator.hid.getDevices();
-        // devices.forEach(device => {
-        //     console.log(`HID: ${device.productName}`);
-        // });
-
-        // devices[0].oninputreport = ({device, reportId, data}) => {
-        //     console.log(`Input report ${reportId} from ${device.productName}:`,
-        //         new Uint8Array(data.buffer));
-        // };
-    });
+        };
 
 
 
 
 
 
+//==========================================================================================
+//
+//==========================================================================================
 
+// let devic = HIDDevice;
+// devic.vendorId=1678;
+// devic.productId=28;
+// devic.productName ="AXIS 295 VIDEO SURVEILLANCE JOYSTICK";
+// devic.collections.pars
+// let hid = await navigator.hid.getDevices(devic);
+// console.log(`fff ${devic}`)
 
-
-
-    //
-    //
-    //
-    // /*let deviceFilter = { vendorId: 1678, productId: 28 };
-    // let requestParams = { filters: [deviceFilter] };
-    // let outputReportId = 0x01;
-    // let outputReport = new Uint8Array([42]);
-    //
-    // function handleConnectedDevice(e) {
-    //     console.log("Device connected: " + e.device.productName);
-    // }
-    //
-    // function handleDisconnectedDevice(e) {
-    //     console.log("Device disconnected: " + e.device.productName);
-    // }
-    //
-    // function handleInputReport(e) {
-    //     console.log(e.device.productName + ": got input report " + e.reportId);
-    //     console.log(new Uint8Array(e.data.buffer));
-    // }
-    //
-    // navigator.hid.addEventListener("connect", handleConnectedDevice);
-    // navigator.hid.addEventListener("disconnect", handleDisconnectedDevice);
-    //
-    // navigator.hid.requestDevice(requestParams).then((devices) => {
-    //     if (devices.length == 0) return;
-    //     devices[0].open().then(() => {
-    //         console.log("Opened device: " + device.productName);
-    //         device.addEventListener("inputreport", handleInputReport);
-    //         device.sendReport(outputReportId, outputReport).then(() => {
-    //             console.log("Sent output report " + outputReportId);
-    //         });
-    //     });*/
-    //
+// function handleConnectedDevice(e) {
+//     console.log("Device connected: " + e.device.productName);
+// }
+// navigator.hid.addEventListener("connect", handleConnectedDevice);
 
 
 
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    //
-    // let devices = await navigator.hid.requestDevice({filters: []});
-    // // let devices = await navigator.hid.getDevices();
-    // console.log("devices: ", devices);
-    // if(!navigator.hid)
-    //     console.log("hid = null");
-    // devices.forEach(device => {
-    //
-    //     console.log(`HID: ${device.productName}`);
-    // });
-});
-
-;
 // let deviceFilter = { vendorId: 1678, productId: 28 };
 // let requestParams = { filters: [deviceFilter] };
 // let outputReportId = 0x01;
