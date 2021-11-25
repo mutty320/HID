@@ -28,17 +28,25 @@
 //             // console.log("HID:", device[0].productName);
 //         }
 //
-
+const JOYSTICK = 1678;
+const MOUSE = 1267;
 //=========================================================================================
 //                  function findMyDeviceInList(devices)
 //=========================================================================================
 
     function findMyDeviceInList(devices){
         console.log("in findMyDeviceInList");
-        for(let i = 0; devices != null && i < devices.length; i++) {
+        for(let device of devices ) {
             // console.log("in loop " + devices[i].vendorId);
-            if(devices[i].vendorId === 1678)
-                return devices[i];
+            // if(device.vendorId === JOYSTICK)
+            if(device.vendorId === MOUSE)
+                return device;
+
+            // for(let i = 0; devices != null && i < devices.length; i++) {
+            //     // console.log("in loop " + devices[i].vendorId);
+            //     // if(devices[i].vendorId === JOYSTICK)
+            //     if(devices[i].vendorId === MOUSE)
+            //         return devices[i];
         }
         return null;//??
     }
@@ -53,30 +61,6 @@
 
         navigator.hid.addEventListener('connect', ({device}) => {
             console.log(`HID connected: ${device.productName}`);
-        });
-
-
-        myDevice.addEventListener("inputreport", event => {
-            const {data, device, reportId} = event;
-
-            if (device.productId !== 28 && reportId !== 0) return;
-
-            const value = data.getUint8(7);
-
-            Bit8(data.getUint8(7))
-            Bit7(data.getUint8(6))
-            Bit6(data.getUint8(5))
-            Bit4(data.getUint8(3))
-            Bit2(data.getUint8(1))
-
-            // console.log(new Uint8Array(event.data.buffer));
-
-            // if (value === 0) return;
-
-            //if(value===0)
-            console.log(value)
-            //  const someButtons = { 1: "22", 2: "23", 4: "25"};
-            //  console.log(`User pressed button ${value}.`);
         });
 
     }
@@ -102,12 +86,12 @@
 
             devices = await navigator.hid.requestDevice({filters: []});
             myDevice = findMyDeviceInList(devices);
+            myDeviceDetails(myDevice);
             });
         }
-
-            await myDevice.open().then(()=>{console.log("opened")})
-            console.log("my device:" + myDevice.vendorId + myDevice.opened);
+        else {
             myDeviceDetails(myDevice)
+        }
 
         });
 
@@ -118,11 +102,16 @@
 //==========================================================================================
 
 
-function myDeviceDetails(myDevice) {
+ async function myDeviceDetails(myDevice) {
+
+    await myDevice.open();
+    console.log(myDevice.vendorId + " is opened?- " + myDevice.opened);
+
+
     for (let collection of myDevice.collections) {
         // A HID collection includes usage, usage page, reports, and subcollections.
-        console.log(`Usage: ${collection.usage}`);
-        console.log(`Usage page: ${collection.usagePage}`);
+        console.log("printing details about the device:");
+        console.log(`Usage: ${collection.usage}` + ` Usage page: ${collection.usagePage}`);
 
         for (let inputReport of collection.inputReports) {
             console.log(`Input report: ${inputReport.reportId}`);
@@ -138,9 +127,32 @@ function myDeviceDetails(myDevice) {
             console.log(`Feature report: ${featureReport.reportId}`);
             // Loop through featureReport.items
         }
-
         // Loop through subcollections with collection.children
     }
+
+
+    myDevice.addEventListener("inputreport", event => {
+        const {data, device, reportId} = event;
+
+        if (device.productId !== 28 && reportId !== 0) return;
+
+        const value = data.getUint8(7);
+
+        Bit8(data.getUint8(7))
+        Bit7(data.getUint8(6))
+        Bit6(data.getUint8(5))
+        Bit4(data.getUint8(3))
+        Bit2(data.getUint8(1))
+
+        // console.log(new Uint8Array(event.data.buffer));
+
+        // if (value === 0) return;
+
+        //if(value===0)
+        console.log(value)
+        //  const someButtons = { 1: "22", 2: "23", 4: "25"};
+        //  console.log(`User pressed button ${value}.`);
+    });
 }
 
 
