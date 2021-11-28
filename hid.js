@@ -89,13 +89,11 @@ const MOUSE = 1267;
             myDeviceDetails(myDevice);
             });
         }
-        else {
+        else
             myDeviceDetails(myDevice)
-        }
 
         });
-
-
+    
 
 //==========================================================================================
 //                          function myDeviceDetails(myDevice)
@@ -214,6 +212,16 @@ const MOUSE = 1267;
 
 
 
+//==========================================================================================
+//                      enum events
+//==========================================================================================
+
+const EventEnum = {
+    ROTATE_RIGHT: Symbol("ROTATE RIGHT"),
+    ROTATE_LEFT: Symbol("ROTATE LEFT"),
+    FIRST: Symbol("FIRST"),
+}
+Object.freeze(EventEnum);
 
 
 //==========================================================================================
