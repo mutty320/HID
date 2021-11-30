@@ -143,13 +143,12 @@ const MOUSE = 1267;
         Bit2(data.getUint8(1))
 
         // console.log(new Uint8Array(event.data.buffer));
-
         // if (value === 0) return;
 
         //if(value===0)
         console.log(value)
-        //  const someButtons = { 1: "22", 2: "23", 4: "25"};
-        //  console.log(`User pressed button ${value}.`);
+        //const someButtons = { 1: "22", 2: "23", 4: "25"};
+        //console.log(`User pressed button ${value}.`);
     });
 }
 
@@ -217,6 +216,7 @@ const MOUSE = 1267;
 //==========================================================================================
 
 const EventEnum = {
+    NOTHING : Symbol("NOTHING"),
     ROTATE_RIGHT: Symbol("ROTATE RIGHT"),
     ROTATE_LEFT: Symbol("ROTATE LEFT"),
     FIRST: Symbol("FIRST"),
@@ -224,6 +224,30 @@ const EventEnum = {
 Object.freeze(EventEnum);
 
 
+
+var myObj= class{
+    // findDevice = findMyDeviceInList;
+    // listeners = addListeners;
+    // deviceDetails = myDeviceDetails;
+    eventMap = {
+        NOTHING : ()=>console.log("nothing"),
+        ROTATE_RIGHT : ()=>console.log("ROTATE_RIGHT")
+    };
+    on = function (string, func){
+        this.eventMap[string] = func;
+    };
+
+    prevEvent = EventEnum.NOTHING;
+    mainLoop = function (event){
+        if(event !== this.prevEvent){
+            this.prevEvent = event;
+            if(this.eventMap.event !== undefined)
+                this.eventMap.event();
+        }
+    }
+
+
+}
 //==========================================================================================
 //
 //==========================================================================================
