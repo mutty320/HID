@@ -28,27 +28,23 @@
 //             // console.log("HID:", device[0].productName);
 //         }
 //
+
 const JOYSTICK = 1678;
-const MOUSE = 1267;
+// const MOUSE = 1267;
+const MOUSE = 14648;
 //=========================================================================================
 //                  function findMyDeviceInList(devices)
 //=========================================================================================
 
     function findMyDeviceInList(devices){
-        console.log("in findMyDeviceInList");
+        // console.log("in findMyDeviceInList");
         for(let device of devices ) {
             // console.log("in loop " + devices[i].vendorId);
             // if(device.vendorId === JOYSTICK)
             if(device.vendorId === MOUSE)
                 return device;
-
-            // for(let i = 0; devices != null && i < devices.length; i++) {
-            //     // console.log("in loop " + devices[i].vendorId);
-            //     // if(devices[i].vendorId === JOYSTICK)
-            //     if(devices[i].vendorId === MOUSE)
-            //         return devices[i];
         }
-        return null;//??
+        return null;
     }
 //=========================================================================================
 //                  function addListeners()
@@ -105,28 +101,28 @@ const MOUSE = 1267;
     await myDevice.open();
     console.log(myDevice.vendorId + " is opened?- " + myDevice.opened);
 
-
-    for (let collection of myDevice.collections) {
-        // A HID collection includes usage, usage page, reports, and subcollections.
-        console.log("printing details about the device:");
-        console.log(`Usage: ${collection.usage}` + ` Usage page: ${collection.usagePage}`);
-
-        for (let inputReport of collection.inputReports) {
-            console.log(`Input report: ${inputReport.reportId}`);
-            // Loop through inputReport.items
-        }
-
-        for (let outputReport of collection.outputReports) {
-            console.log(`Output report: ${outputReport.reportId}`);
-            // Loop through outputReport.items
-        }
-
-        for (let featureReport of collection.featureReports) {
-            console.log(`Feature report: ${featureReport.reportId}`);
-            // Loop through featureReport.items
-        }
-        // Loop through subcollections with collection.children
-    }
+    //
+    // for (let collection of myDevice.collections) {
+    //     // A HID collection includes usage, usage page, reports, and subcollections.
+    //     console.log("printing details about the device:");
+    //     console.log(`Usage: ${collection.usage}` + ` Usage page: ${collection.usagePage}`);
+    //
+    //     for (let inputReport of collection.inputReports) {
+    //         console.log(`Input report: ${inputReport.reportId}`);
+    //         // Loop through inputReport.items
+    //     }
+    //
+    //     for (let outputReport of collection.outputReports) {
+    //         console.log(`Output report: ${outputReport.reportId}`);
+    //         // Loop through outputReport.items
+    //     }
+    //
+    //     for (let featureReport of collection.featureReports) {
+    //         console.log(`Feature report: ${featureReport.reportId}`);
+    //         // Loop through featureReport.items
+    //     }
+    //     // Loop through subcollections with collection.children
+    // }
 
 
     myDevice.addEventListener("inputreport", event => {

@@ -39,11 +39,25 @@
 
 
 const EventEnum = {
-    NOTHING : Symbol("NOTHING"),
-    ROTATE_RIGHT: Symbol("ROTATE_RIGHT"),
-    ROTATE_LEFT:Symbol("ROTATE_LEFT"),
-    FIRST: Symbol("FIRST"),
-    SECOND :Symbol("SECOND")
+    NOTHING :Symbol("NOTHING"),
+    ROTATE_RIGHT:Symbol("ROTATE_RIGHT"),
+    ROTATE_LEFT :Symbol("ROTATE_LEFT"),
+    UP :Symbol("UP"),
+    DOWN :Symbol("DOWN"),
+    RIGHT :Symbol("RIGHT"),
+    LEFT :Symbol("LEFT"),
+    FIRST:Symbol("FIRST"),
+    SECOND :Symbol("SECOND"),
+    THIRD :Symbol("THIRD"),
+    FOURTH :Symbol("FOURTH"),
+    FIFTH :Symbol("FIFTH"),
+    SIXTH :Symbol("SIXTH"),
+    SEVENTH :Symbol("SEVENTH"),
+    EIGHTH :Symbol("EIGHTH"),
+    NINTH :Symbol("NINTH"),
+    TENTH :Symbol("TENTH"),
+    ELEVENTH :Symbol("ELEVENTH"),
+    TWELFTH :Symbol("TWELFTH")
 }
 Object.freeze(EventEnum);
 
@@ -56,9 +70,12 @@ var Mapper= class{
     eventMap = {
         [EventEnum.NOTHING] : ()=>console.log("NOTHING"),
         [EventEnum.ROTATE_RIGHT] : ()=>console.log("ROTATE_RIGHT"),
-        [EventEnum.SECOND] : ()=>console.log("NOT SPECIFIED YET"),
         [EventEnum.ROTATE_LEFT] : ()=>console.log("ROTATE_LEFT"),
-        [EventEnum.FIRST] : ()=>console.log("FIRST")
+        [EventEnum.UP] : ()=>console.log("UP"),
+        [EventEnum.DOWN] : ()=>console.log("DOWN"),
+        [EventEnum.RIGHT] : ()=>console.log("RIGHT"),
+        [EventEnum.LEFT] : ()=>console.log("LEFT"),
+
     };
 
     on = function (eventName, func){
@@ -69,8 +86,6 @@ var Mapper= class{
     execute = function (event){
 
         if(event !== this.prevEvent && this.eventMap[event] !== undefined){
-            // console.log("event " + event)
-
             this.prevEvent = event;
             this.eventMap[event]();
         }
@@ -78,7 +93,18 @@ var Mapper= class{
 }
 
 map = new Mapper();
+map.on(EventEnum.FIRST, ()=>{console.log("FIRST")})
 map.on(EventEnum.SECOND, ()=>{console.log("SECOND")})
+map.on(EventEnum.THIRD, ()=>{console.log("THIRD")})
+map.on(EventEnum.FOURTH, ()=>{console.log("FOURTH")})
+map.on(EventEnum.FIFTH, ()=>{console.log("FIFTH")})
+map.on(EventEnum.SIXTH, ()=>{console.log("SIXTH")})
+map.on(EventEnum.SEVENTH, ()=>{console.log("SEVENTH")})
+map.on(EventEnum.EIGHTH, ()=>{console.log("EIGHTH")})
+map.on(EventEnum.NINTH, ()=>{console.log("NINTH")})
+map.on(EventEnum.TENTH, ()=>{console.log("TENTH")})
+map.on(EventEnum.ELEVENTH, ()=>{console.log("ELEVENTH")})
+map.on(EventEnum.TWELFTH, ()=>{console.log("TWELFTH")})
 //
 // for (let k in EventEnum)
 //     if(EventEnum.hasOwnProperty(k))
@@ -86,7 +112,10 @@ map.on(EventEnum.SECOND, ()=>{console.log("SECOND")})
 
 
 for (let k of Object.keys(EventEnum))
-        map.execute(EventEnum[k]);
+{
+    // console.log("k: " + k )
+    map.execute(EventEnum[k]);
+}
 
 
 // Object.keys(EventEnum).forEach((k)=>{console.log("k: " + k); map.execute(k)})
