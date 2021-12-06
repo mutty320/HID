@@ -1,38 +1,64 @@
 
-cp= (function(x, y, color){
-    function Point() {
-    var obj = {};
-    obj.move = function(dx, dy) {
-        x += dx;
-        y += dy;
-    };
-    obj.toString = function() {
-        return "[Point with x=" + x + " and y=" + y + "]";
+
+/*
+
+ const get_event = (data/!*send the whole array*!/, the_event) =>{
+    switch (the_event) {
+        case EventEnum.Bit8 :
+            return Bit8(data.getUint8(7)/!*the_event*!/)
+        case EventEnum.Bit7 :
+            return Bit7(data.getUint8(6)/!*the_event*!/)
+        case EventEnum.Bit6 :
+            return Bit6(data.getUint8(5)/!*the_event*!/)
+        case EventEnum.Bit4 :
+            return Bit4(data.getUint8(3)/!*the_event*!/)
+        case EventEnum.Bit2 :
+            return Bit2(data.getUint8(1)/!*the_event*!/)
     }
+}
+const Bit7 = (data) => {
 
-    return obj;
+     switch (data.getUint8(7)) {
+           case EventEnum.Bit7.FIRST:
+               return value === 1
+           case EventEnum.Bit7.SECOND:
+               return value === 2
+           case EventEnum.Bit7.THIRD:
+               return value === 4
+           case EventEnum.Bit7.FOURTH:
+               return value === 8
+           case EventEnum.Bit7.FIFTH:
+              return value === 16
+           case EventEnum.Bit7.SIXTH:
+              return value === 32
+           case EventEnum.Bit7.SEVENTH:
+              return value === 64
+          case EventEnum.Bit7.EIGHTH:
+             return value === 128
+
+   }
+
+*/
+
+const EventEnum = {
+    NOTHING: Symbol("NOTHING"),
+
+    Bit2: {
+        RIGHT: Symbol("PUSH_RIGHT"),
+        LEFT: Symbol("PUSH_LEFT")
+    },
+    Bit4: {
+        FRONT: Symbol("PUSH_FRONT"),
+        BACK: Symbol("PUSH_BACK")
+    },
 }
 
-function ColoredPoint() {
-    let obj = Point(x, y);
-    obj.darken = function(tint) {
-        color += tint;
-    };
-    obj.toString = function() {
-        return "[ColoredPoint with x=" + x + ",y=" + y + ",and color=" + color + "]";
-    }
 
-    return obj;
+switch (EventEnum.Bit2.RIGHT) {
+
+    case  EventEnum.Bit2:
+        console.log(EventEnum.Bit2.RIGHT);
+
+    case  EventEnum.Bit2.RIGHT:
+        console.log("how are u");
 }
-return{
-    ColoredPoint: ColoredPoint,
-    Point: Point
-}
-})(5,6, 55)
-
-    console.log(cp.ColoredPoint().toString())
-    cp.ColoredPoint().darken(2)
-    console.log(cp.ColoredPoint().toString())
-    cp.Point().move(2,2)
-    console.log(cp.ColoredPoint().toString())
-
