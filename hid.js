@@ -1,6 +1,409 @@
 
 
 //=========================================================================================
+//                      globals
+//=========================================================================================
+
+const JOYSTICK = 1678;
+// const MOUSE = 1267;
+const MOUSE = 14648;
+
+
+
+//==========================================================================================
+//                      enum events
+//==========================================================================================
+
+
+const ACTION = {
+
+    NOTHING: Symbol.for("NOTHING"),
+
+    //====controlled by the 8th Bit====//
+    RIGHT_BUTTON_ON_STICK: Symbol.for("RIGHT_JOY_STICK"),
+    LEFT_BUTTON_ON_STICK: Symbol.for("LEFT_JOY_STICK"),
+    BOTTOM_RIGHT: Symbol.for("TENTH"),
+    BOTTOM_LEFT: Symbol.for("NINTH"),
+
+    //====controlled by the 7th Bit====//
+    FIRST: Symbol.for("FIRST"),
+    SECOND: Symbol.for("SECOND"),
+    THIRD: Symbol.for("THIRD"),
+    FOURTH: Symbol.for("FOURTH"),
+    FIFTH: Symbol.for("FIFTH"),
+    SIXTH: Symbol.for("SIXTH"),
+    SEVENTH: Symbol.for("SEVENTH"),
+    EIGHTH: Symbol.for("EIGHTH"),
+
+    //====controlled by the 6th Bit====//
+    ROTATE_RIGHT: Symbol.for("ROTATE_RIGHT"),
+    ROTATE_LEFT: Symbol.for("ROTATE_LEFT"),
+
+    //====controlled by the 4th Bit====//
+    FRONT: Symbol.for("PUSH_FRONT"),
+    BACK: Symbol.for("PUSH_BACK"),
+
+    //====controlled by the 2th Bit====//
+    RIGHT: Symbol.for("PUSH_RIGHT"),
+    LEFT: Symbol.for("PUSH_LEFT"),
+
+}
+Object.freeze(ACTION);
+
+
+
+//=========================================================================================
+//                      Mapper
+//=========================================================================================
+
+
+const Mapper = class {
+
+    actions = {
+        // [ACTION.NOTHING] : ()=>console.log("NOTHING"),
+        // [ACTION.ROTATE_RIGHT] : ()=>console.log("ROTATE_RIGHT"),
+
+    };
+    prevAction = ACTION.NOTHING;
+
+
+    on = function (action, func) {
+        this.actions[action] = func;
+    };
+
+    execute = function (action) {
+        if (action !== this.prevAction)
+        {
+            this.prevAction = action;
+        if(this.actions[action] !== undefined)
+            this.actions[action]();
+        }
+    }
+};
+
+
+//
+// for (let k = 0; k < 10; k++) {
+//     for (let i = 0; i < 1000 * 1000 * 1000; i++);
+
+map = new Mapper();
+// map.on(ACTION.NOTHING, ()=>{console.log("NOTHING")})
+map.on(ACTION.FIRST, ()=> {console.log("FIRST")})
+map.on(ACTION.SECOND, ()=>{console.log("SECOND")})
+map.on(ACTION.THIRD, ()=>{console.log("THIRD")})
+map.on(ACTION.FOURTH, ()=>{console.log("FOURTH")})
+map.on(ACTION.FIFTH, ()=>{console.log("FIFTH")})
+map.on(ACTION.SIXTH, ()=>{console.log("SIXTH")})
+map.on(ACTION.SEVENTH, ()=>{console.log("SEVENTH")})
+map.on(ACTION.EIGHTH, ()=>{console.log("EIGHTH")})
+map.on(ACTION.RIGHT_BUTTON_ON_STICK, ()=>{console.log("RIGHT_BUTTON_ON_STICK")})
+map.on(ACTION.LEFT_BUTTON_ON_STICK, ()=>{console.log("LEFT_BUTTON_ON_STICK")})
+map.on(ACTION.BOTTOM_RIGHT, ()=>{console.log("BOTTOM_RIGHT")})
+map.on(ACTION.BOTTOM_LEFT, ()=>{console.log("BOTTOM_LEFT")})
+map.on(ACTION.ROTATE_RIGHT, ()=>{console.log("ROTATE_RIGHT")})
+map.on(ACTION.ROTATE_LEFT, ()=>{console.log("ROTATE_LEFT")})
+map.on(ACTION.FRONT, ()=>{console.log("PUSHED FRONT")})
+map.on(ACTION.BACK, ()=>{console.log("PUSHED BACK")})
+map.on(ACTION.RIGHT, ()=>{console.log("PUSHED RIGHT")})
+map.on(ACTION.LEFT, ()=>{console.log("PUSHED LEFT")})
+
+//
+// for (let k of Object.keys(ACTION))
+// {
+//     console.log("k: " + k )
+//     map.on(k, ()=>{console.log(k)})
+//     map.execute(ACTION[k]);
+// }
+//
+
+//=========================================================================================
+//                  function findMyDeviceInList(devices)
+//=========================================================================================
+
+    function findMyDeviceInList(devices){
+        for(let device of devices ) {
+            if(device.vendorId === JOYSTICK)
+            // if(device.vendorId === MOUSE)
+                return device;
+        }
+        return null;
+    }
+
+//=========================================================================================
+//                  function addListeners()
+//=========================================================================================
+    function addListeners() {
+
+        navigator.hid.addEventListener('disconnect', ({device}) => {
+            console.log(`HID disconnected: ${device.productName}`);
+        });
+
+        navigator.hid.addEventListener('connect', ({device}) => {
+            console.log(`HID connected: ${device.productName}`);
+        });
+
+    }
+
+//=========================================================================================
+//                          main()
+// =========================================================================================
+
+    document.addEventListener('DOMContentLoaded', async () => {
+
+        addListeners();
+
+        var devices = await navigator.hid.getDevices();
+        devices.forEach(device => {
+            console.log(`HID: ${device.vendorId} ${device.productName} ${device.productId} ${device.opened}`);
+        });
+
+        var myDevice = findMyDeviceInList(devices);
+
+        if(!myDevice) {
+            let requestButton = document.getElementById("hid-device");
+            requestButton.innerHTML = "click here to add a new device";
+            requestButton.addEventListener("click", async () => {
+
+            devices = await navigator.hid.requestDevice({filters: []});
+            myDevice = findMyDeviceInList(devices);
+            myDeviceDetails(myDevice);
+            });
+        }
+        else
+            myDeviceDetails(myDevice)
+
+        });
+    
+
+//==========================================================================================
+//                          function myDeviceDetails(myDevice)
+//==========================================================================================
+
+
+ async function myDeviceDetails(myDevice) {
+    if(myDevice === undefined)
+        return;
+
+
+    await myDevice.open();
+    console.log(myDevice.vendorId + " is opened?- " + myDevice.opened);
+
+
+    myDevice.addEventListener("inputreport", event => {
+        const {data, device, reportId} = event;
+
+        if (device.productId !== 28 && reportId !== 0) return;//?
+
+        // const value = data.getUint8(7);
+        //
+        // Bit8(data.getUint8(7))
+        // Bit7(data.getUint8(6))
+        // Bit6(data.getUint8(5))
+        // Bit4(data.getUint8(3))
+        // Bit2(data.getUint8(1))
+
+        console.log(new Uint8Array(event.data.buffer));
+        // if (value === 0) return;
+
+        //if(value===0)
+        // console.log(data.buffer)
+        //const someButtons = { 1: "22", 2: "23", 4: "25"};
+        // console.log(`User pressed button ${value}.`);
+
+
+        let action = get_action(data);
+        map.execute(action);
+
+    });
+}
+
+
+//==========================================================================================
+//          get_event
+//==========================================================================================
+
+const get_action = (data/*send the whole array*/) => {
+
+    // const {data, device, reportId} = event
+
+    switch (data.getUint8(7)) {
+        case 8:
+            // console.log(`right button was pressed on joystick`)
+            return ACTION.RIGHT_BUTTON_ON_STICK
+        case 4:
+            // console.log(`left button was pressed on joystick`)
+            return ACTION.LEFT_BUTTON_ON_STICK
+        case 2:
+            // console.log(`bottom right button was pressed`)
+            return ACTION.BOTTOM_RIGHT
+        case 1 :
+            // console.log(`bottom left button was pressed`)
+            return ACTION.BOTTOM_LEFT
+    }
+
+    switch (data.getUint8(6)) {
+        case 1:
+            // console.log(`top left button was pressed`)
+            return ACTION.FIRST
+        case 2:
+            // console.log(`top right button was pressed`)
+            return ACTION.SECOND
+        case 4:
+            // console.log(`3ed button was pressed`)
+            return ACTION.THIRD
+        case 8:
+            // console.log(`4th button was pressed`)
+            return ACTION.FOURTH
+        case 16:
+            // console.log(`5th button was pressed`)
+            return ACTION.FIFTH
+        case 32:
+            // console.log(`6th button was pressed`)
+            return ACTION.SIXTH
+        case 64:
+            // console.log(`7th button was pressed`)
+            return ACTION.SEVENTH
+        case 128:
+            // console.log(`8th button was pressed`)
+            return ACTION.EIGHTH
+
+    }
+
+    switch (data.getUint8(5)) {
+        case 0:
+            // console.log(`joystick turned to the right`)
+            return ACTION.ROTATE_RIGHT
+        case 3:
+            // console.log(`joystick turned to the left`)
+            return ACTION.ROTATE_LEFT
+    }
+
+    switch (data.getUint8(3)) {
+        case 0:
+            // console.log(`joystick pushed forward`)
+            return ACTION.FRONT
+        case 3:
+            // console.log(`joystick pushed backward`)
+            return ACTION.BACK
+    }
+
+    switch (data.getUint8(1)) {
+        case 0:
+            // console.log(`joystick pushed left`)
+            return ACTION.LEFT
+        case 3:
+            // console.log(`joystick pushed right`)
+            return ACTION.RIGHT
+        default:
+            // console.log(`nothing happened`)
+            return ACTION.NOTHING
+    }
+}
+// Object.keys(ACTION).forEach((k)=>{console.log("k: " + k); map.execute(k)})
+// console.log("Object.keys(ACTION) " + Object.keys(ACTION));
+
+// map.execute(ACTION.FIRST)
+// map.execute("ROTATE_LEFT")
+// map.execute("NOTHING")
+// map.execute("SECOND")
+// map.execute(ACTION.SECOND)
+// map.execute("ROTATE_RIGHT")
+
+
+// Object.entries(ACTION).map(entry => {
+//     let key = entry[0];
+//     let value = entry[1];
+//     console.log(key, value);
+// });
+
+
+
+
+
+//
+// for (let collection of myDevice.collections) {
+//     // A HID collection includes usage, usage page, reports, and subcollections.
+//     console.log("printing details about the device:");
+//     console.log(`Usage: ${collection.usage}` + ` Usage page: ${collection.usagePage}`);
+//
+//     for (let inputReport of collection.inputReports) {
+//         console.log(`Input report: ${inputReport.reportId}`);
+//         // Loop through inputReport.items
+//     }
+//
+//     for (let outputReport of collection.outputReports) {
+//         console.log(`Output report: ${outputReport.reportId}`);
+//         // Loop through outputReport.items
+//     }
+//
+//     for (let featureReport of collection.featureReports) {
+//         console.log(`Feature report: ${featureReport.reportId}`);
+//         // Loop through featureReport.items
+//     }
+//     // Loop through subcollections with collection.children
+// }
+
+//==========================================================================================
+//              mapping functions
+//==========================================================================================
+
+const Bit8 = (value) => {
+    if (value === 8)
+        console.log(`right button was pressed on joystick`)
+    if (value === 4)
+        console.log(`left button was pressed on joystick`)
+    if (value === 2)
+        console.log(`bottom right button was pressed`)
+    if (value === 1)
+        console.log(`bottom left button was pressed`)
+}
+
+const Bit7 = (value) => {
+    if (value === 1)
+        console.log(`top left button was pressed`)
+    if (value === 2)
+        console.log(`top right button was pressed`)
+    if (value === 4)
+        console.log(`3ed button was pressed`)
+    if (value === 8)
+        console.log(`4th button was pressed`)
+    if (value === 16)
+        console.log(`5th button was pressed`)
+    if (value === 32)
+        console.log(`6th button was pressed`)
+    if (value === 64)
+        console.log(`7th button was pressed`)
+    if (value === 128)
+        console.log(`8th button was pressed`)
+}
+const Bit6 = (value) => {
+    if (value === 0)
+        console.log(`joystick turned to the right`)
+    if (value === 3)
+        console.log(`joystick turned to the left`)
+
+}
+const Bit4 = (value) => {
+    if (value === 0)
+        console.log(`joystick pushed forward`)
+    if (value === 3)
+        console.log(`joystick pushed backward`)
+
+}
+const Bit2 = (value) => {
+    if (value === 0)
+        console.log(`joystick pushed left`)
+    if (value === 3)
+        console.log(`joystick pushed right`);
+
+};
+
+
+
+
+
+
+//=========================================================================================
 //                      old stuff
 //=========================================================================================
 
@@ -29,224 +432,13 @@
 //         }
 //
 
-const JOYSTICK = 1678;
-// const MOUSE = 1267;
-const MOUSE = 14648;
-//=========================================================================================
-//                  function findMyDeviceInList(devices)
-//=========================================================================================
-
-    function findMyDeviceInList(devices){
-        // console.log("in findMyDeviceInList");
-        for(let device of devices ) {
-            // console.log("in loop " + devices[i].vendorId);
-            // if(device.vendorId === JOYSTICK)
-            if(device.vendorId === MOUSE)
-                return device;
-        }
-        return null;
-    }
-//=========================================================================================
-//                  function addListeners()
-//=========================================================================================
-    function addListeners() {
-
-        navigator.hid.addEventListener('disconnect', ({device}) => {
-            console.log(`HID disconnected: ${device.productName}`);
-        });
-
-        navigator.hid.addEventListener('connect', ({device}) => {
-            console.log(`HID connected: ${device.productName}`);
-        });
-
-    }
-
-//=========================================================================================
-//                          main()
-// =========================================================================================
-
-    document.addEventListener('DOMContentLoaded', async () => {
-
-        addListeners();
-
-        var devices = await navigator.hid.getDevices();
-        devices.forEach(device => {
-            console.log(`HID: ${device.vendorId} ${device.productName} ${device.productId} ${device.opened}`);
-        });
-        var myDevice = findMyDeviceInList(devices);
-
-        if(!myDevice) {
-            let requestButton = document.getElementById("hid-device");
-            requestButton.innerHTML = "click here to add a new device";
-            requestButton.addEventListener("click", async () => {
-
-            devices = await navigator.hid.requestDevice({filters: []});
-            myDevice = findMyDeviceInList(devices);
-            myDeviceDetails(myDevice);
-            });
-        }
-        else
-            myDeviceDetails(myDevice)
-
-        });
-    
-
-//==========================================================================================
-//                          function myDeviceDetails(myDevice)
-//==========================================================================================
-
-
- async function myDeviceDetails(myDevice) {
-
-    await myDevice.open();
-    console.log(myDevice.vendorId + " is opened?- " + myDevice.opened);
-
-    //
-    // for (let collection of myDevice.collections) {
-    //     // A HID collection includes usage, usage page, reports, and subcollections.
-    //     console.log("printing details about the device:");
-    //     console.log(`Usage: ${collection.usage}` + ` Usage page: ${collection.usagePage}`);
-    //
-    //     for (let inputReport of collection.inputReports) {
-    //         console.log(`Input report: ${inputReport.reportId}`);
-    //         // Loop through inputReport.items
-    //     }
-    //
-    //     for (let outputReport of collection.outputReports) {
-    //         console.log(`Output report: ${outputReport.reportId}`);
-    //         // Loop through outputReport.items
-    //     }
-    //
-    //     for (let featureReport of collection.featureReports) {
-    //         console.log(`Feature report: ${featureReport.reportId}`);
-    //         // Loop through featureReport.items
-    //     }
-    //     // Loop through subcollections with collection.children
-    // }
-
-
-    myDevice.addEventListener("inputreport", event => {
-        const {data, device, reportId} = event;
-
-        if (device.productId !== 28 && reportId !== 0) return;
-
-        const value = data.getUint8(7);
-
-        Bit8(data.getUint8(7))
-        Bit7(data.getUint8(6))
-        Bit6(data.getUint8(5))
-        Bit4(data.getUint8(3))
-        Bit2(data.getUint8(1))
-
-        // console.log(new Uint8Array(event.data.buffer));
-        // if (value === 0) return;
-
-        //if(value===0)
-        console.log(value)
-        //const someButtons = { 1: "22", 2: "23", 4: "25"};
-        //console.log(`User pressed button ${value}.`);
-    });
-}
-
-
-//==========================================================================================
-//              mapping functions
-//==========================================================================================
-
-        const Bit8 = (value) => {
-            if (value === 8)
-                console.log(`right button was pressed on joystick`)
-            if (value === 4)
-                console.log(`left button was pressed on joystick`)
-            if (value === 2)
-                console.log(`bottom right button was pressed`)
-            if (value === 1)
-                console.log(`bottom left button was pressed`)
-        }
-
-        const Bit7 = (value) => {
-            if (value === 1)
-                console.log(`top left button was pressed`)
-            if (value === 2)
-                console.log(`top right button was pressed`)
-            if (value === 4)
-                console.log(`3ed button was pressed`)
-            if (value === 8)
-                console.log(`4th button was pressed`)
-            if (value === 16)
-                console.log(`5th button was pressed`)
-            if (value === 32)
-                console.log(`6th button was pressed`)
-            if (value === 64)
-                console.log(`7th button was pressed`)
-            if (value === 128)
-                console.log(`8th button was pressed`)
-        }
-        const Bit6 = (value) => {
-            if (value === 0)
-                console.log(`joystick turned to the right`)
-            if (value === 3)
-                console.log(`joystick turned to the left`)
-
-        }
-        const Bit4 = (value) => {
-            if (value === 0)
-                console.log(`joystick pushed forward`)
-            if (value === 3)
-                console.log(`joystick pushed backward`)
-
-        }
-        const Bit2 = (value) => {
-            if (value === 0)
-                console.log(`joystick pushed left`)
-            if (value === 3)
-                console.log(`joystick pushed right`);
-
-        };
 
 
 
 
-//==========================================================================================
-//                      enum events
-//==========================================================================================
-
-const EventEnum = {
-    NOTHING : Symbol("NOTHING"),
-    ROTATE_RIGHT: Symbol("ROTATE RIGHT"),
-    ROTATE_LEFT: Symbol("ROTATE LEFT"),
-    FIRST: Symbol("FIRST"),
-}
-Object.freeze(EventEnum);
 
 
 
-var myObj= class{
-    // findDevice = findMyDeviceInList;
-    // listeners = addListeners;
-    // deviceDetails = myDeviceDetails;
-    eventMap = {
-        NOTHING : ()=>console.log("nothing"),
-        ROTATE_RIGHT : ()=>console.log("ROTATE_RIGHT")
-    };
-    on = function (string, func){
-        this.eventMap[string] = func;
-    };
-
-    prevEvent = EventEnum.NOTHING;
-    mainLoop = function (event){
-        if(event !== this.prevEvent){
-            this.prevEvent = event;
-            if(this.eventMap.event !== undefined)
-                this.eventMap.event();
-        }
-    }
-
-
-}
-//==========================================================================================
-//
-//==========================================================================================
 
 // let devic = HIDDevice;
 // devic.vendorId=1678;
